@@ -8,14 +8,13 @@
 using namespace std;
 using namespace cv;
 
-
-void dp(Mat m, string title) {
-  namedWindow(title, WINDOW_NORMAL);
-  imshow(title, m);
-}
+//void dp(Mat m, string title) {
+//  namedWindow(title, WINDOW_NORMAL);
+//  imshow(title, m);
+//}
 
 Mat NormalMapImageToFxFyImage(const Mat &nm_img, const float dx,
-                                  const float dy) {
+                              const float dy) {
   Mat tmpf32;
 
   assert(nm_img.channels() == 3 &&
@@ -37,81 +36,71 @@ Mat NormalMapImageToFxFyImage(const Mat &nm_img, const float dx,
 }
 
 Mat IntegrateLRTB(const Mat &nm, const Mat &invalid) {
-    const int rows = nm.rows;
-    const int cols = nm.cols;
+  const int rows = nm.rows;
+  const int cols = nm.cols;
 
-    Mat al = Mat(nm.size(), nm.depth());
-    Mat ar = Mat(nm.size(), nm.depth());
-    al.setTo(Scalar(0.0)); // L --> R
-    ar.setTo(Scalar(0.0)); // R --> L
-    vector<int> hidxs(rows);
-    iota(hidxs.begin(), hidxs.end(), 0);
-    for_each(execution::par_unseq, hidxs.begin(), hidxs.end(), [&](const int i) {
-        for (int j = 0; j < cols; ++j) {
-            if (invalid.at<uchar>(i, j))
-                continue;
-            const float fx = nm.at<Vec2f>(i, j)[0];
-            const float lfx =
-                (fx + ((j > 0) ? nm.at<Vec2f>(i, j - 1)[0] : 0.0)) / 2;
-            const float lz = (j > 0) ? al.at<float>(i, j - 1) : 0.0;
-            al.at<float>(i, j) = lz + lfx;
-        }
-        for (int j = cols - 1; j > -1; --j) {
-            if (invalid.at<uchar>(i, j))
-                continue;
-            const float fx = nm.at<Vec2f>(i, j)[0];
-            const float rfx =
-                (fx + ((j < cols - 1) ? nm.at<Vec2f>(i, j + 1)[0] : 0.0)) / 2;
-            const float rz = (j < cols - 1) ? ar.at<float>(i, j + 1) : 0.0;
-            ar.at<float>(i, j) = rz - rfx;
-        }
-    });
+  Mat al = Mat(nm.size(), nm.depth(), Scalar(0.0));
+  Mat ar = Mat(nm.size(), nm.depth(), Scalar(0.0));
+  vector<int> hidxs(rows);
+  iota(hidxs.begin(), hidxs.end(), 0);
+  for_each(execution::par_unseq, hidxs.begin(), hidxs.end(), [&](const int i) {
+    for (int j = 0; j < cols; ++j) {
+      if (invalid.at<uchar>(i, j))
+        continue;
+      const float fx = nm.at<Vec2f>(i, j)[0];
+      const float lfx = (fx + ((j > 0) ? nm.at<Vec2f>(i, j - 1)[0] : 0.0)) / 2;
+      const float lz = (j > 0) ? al.at<float>(i, j - 1) : 0.0;
+      al.at<float>(i, j) = lz + lfx;
+    }
+    for (int j = cols - 1; j > -1; --j) {
+      if (invalid.at<uchar>(i, j))
+        continue;
+      const float fx = nm.at<Vec2f>(i, j)[0];
+      const float rfx =
+          (fx + ((j < cols - 1) ? nm.at<Vec2f>(i, j + 1)[0] : 0.0)) / 2;
+      const float rz = (j < cols - 1) ? ar.at<float>(i, j + 1) : 0.0;
+      ar.at<float>(i, j) = rz - rfx;
+    }
+  });
 
-    Mat at = Mat(nm.size(), nm.depth());
-    Mat ab = Mat(nm.size(), nm.depth());
-    at.setTo(Scalar(0.0)); // T --> B
-    ab.setTo(Scalar(0.0)); // B --> T
-    hidxs.resize(cols);
-    iota(hidxs.begin(), hidxs.end(), 0);
-    for_each(execution::par_unseq, hidxs.begin(), hidxs.end(), [&](const int j) {
-        for (int i = 0; i < rows; ++i) {
-            if (invalid.at<uchar>(i, j))
-                continue;
-            const float fy = nm.at<Vec2f>(i, j)[1];
-            const float tfy =
-                (fy + ((i > 0) ? nm.at<Vec2f>(i - 1, j)[1] : 0.0)) / 2;
-            const float tz = (i > 0) ? at.at<float>(i - 1, j) : 0.0;
-            at.at<float>(i, j) = tz - tfy;
-        }
-        for (int i = rows - 1; i > -1; --i) {
-            if (invalid.at<uchar>(i, j))
-                continue;
-            const float fy = nm.at<Vec2f>(i, j)[1];
-            const float bfy =
-                (fy + ((i < rows - 1) ? nm.at<Vec2f>(i + 1, j)[1] : 0.0)) / 2;
-            const float bz = (i < rows - 1) ? ab.at<float>(i + 1, j) : 0.0;
-            ab.at<float>(i, j) = bz + bfy;
-        }
-    });
-    return 0.25 * (al + ar + at + ab);
+  Mat at = Mat(nm.size(), nm.depth(), Scalar(0.0));
+  Mat ab = Mat(nm.size(), nm.depth(), Scalar(0.0));
+  hidxs.resize(cols);
+  iota(hidxs.begin(), hidxs.end(), 0);
+  for_each(execution::par_unseq, hidxs.begin(), hidxs.end(), [&](const int j) {
+    for (int i = 0; i < rows; ++i) {
+      if (invalid.at<uchar>(i, j))
+        continue;
+      const float fy = nm.at<Vec2f>(i, j)[1];
+      const float tfy = (fy + ((i > 0) ? nm.at<Vec2f>(i - 1, j)[1] : 0.0)) / 2;
+      const float tz = (i > 0) ? at.at<float>(i - 1, j) : 0.0;
+      at.at<float>(i, j) = tz - tfy;
+    }
+    for (int i = rows - 1; i > -1; --i) {
+      if (invalid.at<uchar>(i, j))
+        continue;
+      const float fy = nm.at<Vec2f>(i, j)[1];
+      const float bfy =
+          (fy + ((i < rows - 1) ? nm.at<Vec2f>(i + 1, j)[1] : 0.0)) / 2;
+      const float bz = (i < rows - 1) ? ab.at<float>(i + 1, j) : 0.0;
+      ab.at<float>(i, j) = bz + bfy;
+    }
+  });
+  return 0.25 * (al + ar + at + ab);
 }
 
-
-
-void OPTIteration(const Mat &dZ, const Mat &invalid_pixels,
-                       const Mat &src, Mat &dst) {
+void OPTIteration(const Mat &dZ, const Mat &invalid_pixels, const Mat &src,
+                  Mat &dst) {
   static const float kdata[] = {0.0,  0.25, 0.0,  0.25, 0.0,
                                 0.25, 0.0,  0.25, 0.0};
   const Mat kernel(3, 3, CV_32FC1, (void *)kdata);
-  filter2D(src, dst, src.depth(), kernel, Point{-1, -1}, 0.0,
-               BORDER_DEFAULT);
+  filter2D(src, dst, src.depth(), kernel, Point{-1, -1}, 0.0, BORDER_DEFAULT);
   dst += dZ;
   dst.setTo({0.0}, invalid_pixels);
 }
 
-void GetRotateProblem(const Mat &nm, const Mat &invalid,
-                      const double angle, Mat &nm_rotated,
-                      Mat &invalid_rotated) {
+void GetRotateProblem(const Mat &nm, const Mat &invalid, const double angle,
+                      Mat &nm_rotated, Mat &invalid_rotated) {
   const int rows = nm.rows;
   const int cols = nm.cols;
   const Point2f center{0.5f * nm.cols, 0.5f * nm.rows};
@@ -141,9 +130,9 @@ void GetRotateProblem(const Mat &nm, const Mat &invalid,
     }
   });
   warpAffine(nm_rotated, nm_rotated, R, nm_rotated.size(), INTER_LINEAR,
-                 BORDER_CONSTANT, Scalar(0.0, 0.0));
-  warpAffine(invalid, invalid_rotated, R, nm_rotated.size(),
-                 INTER_LINEAR, BORDER_CONSTANT, Scalar(0));
+             BORDER_CONSTANT, Scalar(0.0, 0.0));
+  warpAffine(invalid, invalid_rotated, R, nm_rotated.size(), INTER_LINEAR,
+             BORDER_CONSTANT, Scalar(0));
 
   nm_rotated.setTo(Scalar{0.0, 0.0}, invalid_rotated);
 }
