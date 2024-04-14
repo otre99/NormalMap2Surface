@@ -49,7 +49,7 @@ void MethodLRTB(Mat &nm, Mat &invalid, Mat &surf,
 }
 
 void MethodOPT(Mat &nm, Mat &invalid, Mat &src, int niters){
-    printf("  OPT method %9d iterations\n",  niters);
+    printf("   OPT method %9d iterations\n",  niters);
     auto t1 = GetTimePoint();
     const int dp_n = niters / 10;
     Mat deltaZ = calculateDeltaZ(nm);
