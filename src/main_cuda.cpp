@@ -99,7 +99,7 @@ int main(int argc, char *argv[]) {
   const int lrtb_iters = parser.get<int>("lrtb_iters");
   const int opt_iters = parser.get<int>("opt_iters");
 
-  Mat nm = imread(input_image_path, IMREAD_UNCHANGED);
+  Mat nm = imread(input_image_path, cv::IMREAD_COLOR | cv::IMREAD_ANYDEPTH);
   nm = NormalMapImageToFxFyImage(nm, scale, scale);
 
   Mat invalid_pts = GenMask(nm.size(), input_mask_path);

@@ -16,7 +16,6 @@ using namespace cv;
 Mat NormalMapImageToFxFyImage(const Mat &nm_img, const float dx,
                               const float dy) {
   Mat tmpf32;
-
   assert(nm_img.channels() == 3 &&
          (nm_img.depth() == CV_8U || nm_img.depth() == CV_16U));
   const double alpha = (nm_img.depth() == CV_8U) ? 2.0 / 255.0 : 2.0 / 65535.0;
