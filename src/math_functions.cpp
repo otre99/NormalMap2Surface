@@ -36,6 +36,7 @@ Mat NormalMapImageToFxFyImage(const Mat &nm_img, const float dx,
 }
 
 Mat IntegrateLRTB(const Mat &nm, const Mat &invalid) {
+  //TODO(otre99): optimize this code
   const int rows = nm.rows;
   const int cols = nm.cols;
 
