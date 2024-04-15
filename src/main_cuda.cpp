@@ -124,9 +124,9 @@ int main(int argc, char *argv[]) {
   const string mask_file = base_name + ".png";
 
   printf("Saving surface to: '%s'\n", surf_file.data());
-  SaveMatToBinary(surf, base_name + ".surf");
+  SaveMatToBinary(surf, surf_file);
 
-  printf("Saving mask to   : '%s'\n", mask_file.data());
+  printf("Saving mask to   : '%s'\n", mask_file);
   invalid_pts.setTo({255}, invalid_pts == 0);
   invalid_pts.setTo({0}, invalid_pts == 1);
   cv::imwrite(mask_file, invalid_pts);

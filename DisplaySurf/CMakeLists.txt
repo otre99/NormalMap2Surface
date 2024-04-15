@@ -19,6 +19,8 @@ set(PROJECT_SOURCES
         main.cpp
         mainwindow.cpp
         mainwindow.h
+        colormapping.h
+        colormapping.cpp
         mainwindow.ui
 )
 

@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
   Mat invalid_pts = GenMask(nm.size(), input_mask_path);
 
   printf("Parameters: \n");
-  printf("  Input image       : '%s' [%d x %d ]\n", input_image_path.data(),
+  printf("  Input image       : '%s' [%d x %d]\n", input_image_path.data(),
          nm.cols, nm.rows);
   printf("  LRTB interations  : %8d\n", lrtb_iters);
   printf("  OPT interations   : %8d\n", opt_iters);
@@ -105,7 +105,7 @@ int main(int argc, char *argv[]) {
   const string mask_file = base_name + ".png";
 
   printf("Saving surface to: '%s'\n", surf_file.data());
-  SaveMatToBinary(surf, base_name + ".surf");
+  SaveMatToBinary(surf, surf_file);
 
   printf("Saving mask to   : '%s'\n", mask_file.data());
   invalid_pts.setTo({255}, invalid_pts == 0);
